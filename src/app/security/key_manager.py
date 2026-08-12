@@ -43,6 +43,13 @@ class ChaveDeAssinatura:
     chave_privada_pem: str
 
 
+@dataclass(frozen=True, slots=True)
+class ChavePublicaRegistrada:
+    kid: str
+    algoritmo: str
+    chave_publica_pem: str
+
+
 class CacheChavesPrivadas:
     """Cache em memória com TTL curto, para não ir ao Vault a cada token."""
 
@@ -115,12 +122,20 @@ class GerenciadorChaves:
 
     # -- validação / publicação ------------------------------------------
 
-    async def obter_chave_publica(self, kid: str) -> str | None:
-        """Chave pública de um ``kid``, para validar tokens (inclusive antigos)."""
+    async def obter_chave_publica(self, kid: str) -> ChavePublicaRegistrada | None:
+        """Chave pública de um ``kid``, para validar tokens (inclusive antigos).
+
+        Devolve também o algoritmo **registrado** para a chave: a validação
+        nunca deve confiar no ``alg`` que veio no cabeçalho do token.
+        """
         chave = await self._repositorio.buscar_por_kid(kid)
         if chave is None or not StatusChave(chave.status).publicavel_no_jwks:
             return None
-        return chave.chave_publica_pem
+        return ChavePublicaRegistrada(
+            kid=chave.kid,
+            algoritmo=chave.algoritmo,
+            chave_publica_pem=chave.chave_publica_pem,
+        )
 
     async def obter_jwks(self) -> dict[str, list[dict[str, Any]]]:
         """JWKS montado apenas com o PostgreSQL — não depende do Vault."""
