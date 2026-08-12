@@ -13,6 +13,8 @@ from app.database import obter_sessao
 from app.repositories.chave_jwt_repository import ChaveJwtRepositorioSQL
 from app.repositories.cliente_repository import ClienteRepositorioSQL
 from app.repositories.rpa_repository import RpaRepositorioSQL
+from app.security.admin_auth import AutenticadorAdmin, criar_autenticador_admin
+from app.security.jwt_service import ServicoJwt
 from app.security.key_manager import GerenciadorChaves
 from app.vault.client import VaultClient
 from app.vault.http_client import VaultHttpClient
@@ -69,3 +71,27 @@ def obter_gerenciador_chaves(
 
 
 GerenciadorChavesDep = Annotated[GerenciadorChaves, Depends(obter_gerenciador_chaves)]
+
+
+def obter_servico_jwt(
+    gerenciador_chaves: GerenciadorChavesDep,
+    settings: SettingsDep,
+) -> ServicoJwt:
+    return ServicoJwt(
+        gerenciador_chaves,
+        issuer=settings.jwt_issuer,
+        audience=settings.jwt_audience,
+        expiracao_minutos=settings.access_token_expire_minutes,
+    )
+
+
+ServicoJwtDep = Annotated[ServicoJwt, Depends(obter_servico_jwt)]
+
+
+@lru_cache(maxsize=1)
+def obter_autenticador_admin() -> AutenticadorAdmin:
+    """Implementação de autenticação administrativa em uso (estática ou Entra ID)."""
+    return criar_autenticador_admin(obter_settings())
+
+
+AutenticadorAdminDep = Annotated[AutenticadorAdmin, Depends(obter_autenticador_admin)]
