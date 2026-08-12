@@ -30,11 +30,5 @@ class ChaveJwtRepositorioSQL(RepositorioSQL):
         )
         return list(resultado.all())
 
-    async def listar_em_rotacao(self) -> list[ChaveJwt]:
-        resultado = await self.sessao.exec(
-            select(ChaveJwt).where(ChaveJwt.status == StatusChave.EM_ROTACAO)
-        )
-        return list(resultado.all())
-
     async def salvar(self, chave: ChaveJwt) -> ChaveJwt:
         return await self._persistir(chave)

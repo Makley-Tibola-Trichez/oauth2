@@ -10,6 +10,7 @@ from fastapi import FastAPI
 
 from app import __version__
 from app.config import obter_settings
+from app.dependencies import obter_vault
 from app.observability.logging import configurar_logging
 from app.observability.middleware import MiddlewareRequestId
 from app.routers import health
@@ -25,6 +26,7 @@ async def ciclo_de_vida(app: FastAPI) -> AsyncIterator[None]:
         extra={"ambiente": settings.app_env, "versao": __version__},
     )
     yield
+    await obter_vault().fechar()
     logger.info("Serviço finalizado")
 
 
