@@ -5,19 +5,46 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import (
+    HTTPAuthorizationCredentials,
+    HTTPBasic,
+    HTTPBasicCredentials,
+    HTTPBearer,
+)
 
 from app.dependencies import AutenticadorAdminDep, ServicoJwtDep
 from app.observability import auditoria
 from app.security.admin_auth import CredencialAdminInvalidaError, IdentidadeAdmin
 from app.security.jwt_service import ClaimsToken, TokenInvalidoError
+from app.services.erros import CredenciaisInvalidasError
 
 esquema_bearer = HTTPBearer(auto_error=False, scheme_name="Bearer")
+esquema_basic = HTTPBasic(auto_error=False, scheme_name="ClientCredentialsBasic")
 
 CredenciaisBearer = Annotated[
     HTTPAuthorizationCredentials | None,
     Depends(esquema_bearer),
 ]
+CredenciaisBasic = Annotated[
+    HTTPBasicCredentials | None,
+    Depends(esquema_basic),
+]
+
+
+def resolver_credenciais_cliente(
+    basic: HTTPBasicCredentials | None,
+    client_id: str | None,
+    client_secret: str | None,
+) -> tuple[str, str]:
+    """Extrai ``client_id``/``client_secret`` do cabeçalho Basic ou do formulário.
+
+    A RFC 6749 prevê as duas formas; o cabeçalho tem precedência quando presente.
+    """
+    if basic is not None:
+        return basic.username, basic.password
+    if client_id and client_secret:
+        return client_id, client_secret
+    raise CredenciaisInvalidasError("Credenciais de cliente não informadas")
 
 
 async def requer_admin(

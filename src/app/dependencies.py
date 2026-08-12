@@ -16,6 +16,10 @@ from app.repositories.rpa_repository import RpaRepositorioSQL
 from app.security.admin_auth import AutenticadorAdmin, criar_autenticador_admin
 from app.security.jwt_service import ServicoJwt
 from app.security.key_manager import GerenciadorChaves
+from app.services.cliente_service import ServicoCliente
+from app.services.introspeccao_service import ServicoIntrospeccao
+from app.services.rpa_service import ServicoRpa
+from app.services.token_service import ServicoToken
 from app.vault.client import VaultClient
 from app.vault.http_client import VaultHttpClient
 
@@ -95,3 +99,34 @@ def obter_autenticador_admin() -> AutenticadorAdmin:
 
 
 AutenticadorAdminDep = Annotated[AutenticadorAdmin, Depends(obter_autenticador_admin)]
+
+
+def obter_servico_token(
+    cliente_repositorio: ClienteRepositorioDep,
+    rpa_repositorio: RpaRepositorioDep,
+    vault: VaultDep,
+    servico_jwt: ServicoJwtDep,
+) -> ServicoToken:
+    return ServicoToken(cliente_repositorio, rpa_repositorio, vault, servico_jwt)
+
+
+def obter_servico_cliente(cliente_repositorio: ClienteRepositorioDep) -> ServicoCliente:
+    return ServicoCliente(cliente_repositorio)
+
+
+def obter_servico_rpa(rpa_repositorio: RpaRepositorioDep, vault: VaultDep) -> ServicoRpa:
+    return ServicoRpa(rpa_repositorio, vault)
+
+
+def obter_servico_introspeccao(
+    servico_jwt: ServicoJwtDep,
+    cliente_repositorio: ClienteRepositorioDep,
+    rpa_repositorio: RpaRepositorioDep,
+) -> ServicoIntrospeccao:
+    return ServicoIntrospeccao(servico_jwt, cliente_repositorio, rpa_repositorio)
+
+
+ServicoTokenDep = Annotated[ServicoToken, Depends(obter_servico_token)]
+ServicoClienteDep = Annotated[ServicoCliente, Depends(obter_servico_cliente)]
+ServicoRpaDep = Annotated[ServicoRpa, Depends(obter_servico_rpa)]
+ServicoIntrospeccaoDep = Annotated[ServicoIntrospeccao, Depends(obter_servico_introspeccao)]

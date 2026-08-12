@@ -13,7 +13,13 @@ from app.models.cliente import Cliente
 from app.models.rpa import Rpa
 
 
-class ClienteRepositorio(Protocol):
+class Repositorio(Protocol):
+    async def confirmar(self) -> None:
+        """Confirma a transação da sessão compartilhada pela requisição."""
+        ...
+
+
+class ClienteRepositorio(Repositorio, Protocol):
     async def buscar_por_client_id(self, client_id: str) -> Cliente | None: ...
 
     async def listar(self) -> list[Cliente]: ...
@@ -21,7 +27,7 @@ class ClienteRepositorio(Protocol):
     async def salvar(self, cliente: Cliente) -> Cliente: ...
 
 
-class RpaRepositorio(Protocol):
+class RpaRepositorio(Repositorio, Protocol):
     async def buscar_por_rpa_id(self, rpa_id: str) -> Rpa | None: ...
 
     async def listar(self) -> list[Rpa]: ...
@@ -29,7 +35,7 @@ class RpaRepositorio(Protocol):
     async def salvar(self, rpa: Rpa) -> Rpa: ...
 
 
-class ChaveJwtRepositorio(Protocol):
+class ChaveJwtRepositorio(Repositorio, Protocol):
     async def buscar_ativa(self) -> ChaveJwt | None: ...
 
     async def buscar_por_kid(self, kid: str) -> ChaveJwt | None: ...
