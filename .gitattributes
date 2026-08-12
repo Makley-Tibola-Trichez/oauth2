@@ -1,0 +1,5 @@
+# Mantém LF no repositório e no working copy: os arquivos são montados em
+# containers Linux (scripts de init do Postgres) e comparados em testes.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
