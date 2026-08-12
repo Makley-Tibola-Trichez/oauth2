@@ -4,6 +4,7 @@ node_modules/
 # build
 dist/
 build/
+*.tsbuildinfo
 
 # ambiente
 .env
@@ -17,6 +18,7 @@ coverage/
 
 # prisma
 prisma/generated/
+src/generated/
 
 # logs
 *.log
@@ -27,3 +29,4 @@ pnpm-debug.log*
 .idea/
 .vscode/
 .DS_Store
+
