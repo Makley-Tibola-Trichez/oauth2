@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
   Inject,
+  Injectable,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { JSON_LOGGER } from '../logging';
@@ -17,6 +18,7 @@ import type { JsonLoggerService } from '../logging/json-logger.service';
  * qualquer exceção não tratada, sempre logada em JSON, nunca com stack de
  * segredo (o `JsonLoggerService` redige os campos estruturados).
  */
+@Injectable()
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   constructor(@Inject(JSON_LOGGER) private readonly logger: JsonLoggerService) {}
