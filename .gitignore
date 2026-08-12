@@ -1,0 +1,29 @@
+# dependências
+node_modules/
+
+# build
+dist/
+build/
+
+# ambiente
+.env
+.env.local
+*.pem
+*.key
+
+# testes / cobertura
+coverage/
+.jest-cache/
+
+# prisma
+prisma/generated/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# editor / SO
+.idea/
+.vscode/
+.DS_Store

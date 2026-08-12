@@ -1,0 +1,9 @@
+onlyBuiltDependencies:
+  - argon2
+  - '@prisma/engines'
+  - prisma
+  - '@swc/core'
+
+ignoredBuiltDependencies:
+  - '@scarf/scarf'
+  - unrs-resolver
