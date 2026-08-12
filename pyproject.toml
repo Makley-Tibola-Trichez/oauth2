@@ -52,5 +52,9 @@ src = ["src", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
+[tool.ruff.lint.per-file-ignores]
+# Migrations são geradas pelo Alembic; formatação longa é esperada.
+"migrations/versions/*" = ["E501"]
+
 [tool.coverage.run]
 source = ["src/app"]
