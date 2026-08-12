@@ -23,8 +23,11 @@
         "noExplicitAny": "off"
       },
       "style": {
-        "useImportType": "error",
-        "useNodejsImportProtocol": "error"
+        "useNodejsImportProtocol": "error",
+        "useImportType": "off"
+      },
+      "correctness": {
+        "noUnusedFunctionParameters": "off"
       }
     }
   },
@@ -34,6 +37,9 @@
       "semicolons": "always",
       "trailingCommas": "all",
       "arrowParentheses": "always"
+    },
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
     }
   },
   "assist": {
