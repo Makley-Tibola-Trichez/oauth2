@@ -21,7 +21,10 @@ router = APIRouter(tags=["Infraestrutura"])
 
 async def _verificar_banco(sessao: AsyncSession) -> StatusComponente:
     try:
-        await sessao.execute(text("SELECT 1"))
+        # Via connection() porque `execute` direto na sessão do SQLModel emite
+        # um DeprecationWarning voltado a queries de model, não a SQL cru.
+        conexao = await sessao.connection()
+        await conexao.execute(text("SELECT 1"))
     except Exception:
         logger.warning("Banco de dados indisponível", exc_info=True)
         return "indisponivel"
