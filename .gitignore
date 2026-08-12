@@ -1,0 +1,27 @@
+# dependências
+node_modules/
+
+# build
+dist/
+build/
+*.tsbuildinfo
+
+# ambiente
+.env
+.env.local
+*.pem
+*.key
+
+# testes / cobertura
+coverage/
+
+# prisma
+src/generated/
+
+# logs
+*.log
+
+# editor / SO
+.idea/
+.vscode/
+.DS_Store
