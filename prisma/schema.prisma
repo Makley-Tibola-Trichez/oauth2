@@ -1,0 +1,70 @@
+// Schema do microserviço de autenticação OAuth2 (RPAs + microsserviços).
+//
+// Nomes de campo em português; termos padronizados do OAuth2 (client_id,
+// client_secret, grant_type...) são preservados nos schemas HTTP. Os enums
+// de status são persistidos como String (não como enum nativo do Postgres)
+// para evitar migrations de ALTER TYPE — a validação fica na aplicação.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  // O projeto é ESM puro (Bun, "type": "module" no package.json), então o
+  // gerador pode emitir ESM sem o problema de import.meta.url quebrando sob
+  // CommonJS que apareceria num projeto CJS. Fixado mesmo assim, explícito.
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Credencial OAuth2 de um microsserviço ou da aplicação compartilhada das RPAs.
+/// O client_secret só existe aqui em forma de hash (Argon2id).
+model Cliente {
+  id                  String    @id @default(uuid())
+  clientId            String    @unique @map("client_id")
+  clientSecretHash    String    @map("client_secret_hash")
+  nome                String
+  descricao           String?
+  tipo                String
+  status              String    @default("ativo")
+  criadoEm            DateTime  @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm        DateTime  @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+  secretRotacionadoEm DateTime? @map("secret_rotacionado_em") @db.Timestamptz(3)
+  revogadoEm          DateTime? @map("revogado_em") @db.Timestamptz(3)
+
+  @@index([status])
+  @@index([tipo])
+  @@map("clientes")
+}
+
+/// Cadastro e status de uma RPA. As credenciais e a autorização do rpaId
+/// ficam no Vault — as duas fontes precisam concordar para emitir um token.
+model Rpa {
+  id           String    @id @default(uuid())
+  rpaId        String    @unique @map("rpa_id")
+  nome         String
+  descricao    String?
+  status       String    @default("ativo")
+  criadoEm     DateTime  @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime  @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+  revogadoEm   DateTime? @map("revogado_em") @db.Timestamptz(3)
+
+  @@index([status])
+  @@map("rpas")
+}
+
+/// Metadados públicos das chaves de assinatura JWT. Só a chave privada
+/// correspondente vive no Vault (path `jwt/keys/{kid}`) — aqui fica apenas
+/// o que o JWKS precisa publicar.
+model ChaveJwt {
+  kid             String    @id
+  chavePublicaPem String    @map("chave_publica_pem")
+  algoritmo       String    @default("RS256")
+  status          String    @default("ativa")
+  criadoEm        DateTime  @default(now()) @map("criado_em") @db.Timestamptz(3)
+  expiraEm        DateTime? @map("expira_em") @db.Timestamptz(3)
+
+  @@index([status])
+  @@map("chaves_jwt")
+}

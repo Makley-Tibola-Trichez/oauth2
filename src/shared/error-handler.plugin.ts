@@ -1,13 +1,11 @@
 /**
  * Handler global de erros. Erros de domínio (`ErroOAuth`, `ErroDeNegocio`,
- * `ChaveDeAssinaturaIndisponivelError`) viram a resposta HTTP correspondente;
- * qualquer outra coisa vira `500` genérico, sempre logado.
- *
- * O tratamento de `VaultError` é acrescentado quando o módulo `vault/`
- * existir (a implementação concreta do cliente é fornecida à parte).
+ * `ChaveDeAssinaturaIndisponivelError`, `VaultError`) viram a resposta HTTP
+ * correspondente; qualquer outra coisa vira `500` genérico, sempre logado.
  */
 
 import { Elysia } from 'elysia';
+import { VaultError } from '../vault/client';
 import { ChaveDeAssinaturaIndisponivelError, ErroDeNegocio, ErroOAuth } from './errors';
 import { logger } from './logging';
 
@@ -27,10 +25,15 @@ export const errorHandlerPlugin = new Elysia({ name: 'error-handler' }).onError(
       return { detail: error.message };
     }
 
-    if (error instanceof ChaveDeAssinaturaIndisponivelError) {
+    if (error instanceof ChaveDeAssinaturaIndisponivelError || error instanceof VaultError) {
       set.status = 503;
       logger.error(error.message, 'error-handler', { tipo: error.constructor.name });
-      return { detail: 'Serviço de assinatura indisponível' };
+      return {
+        detail:
+          error instanceof VaultError
+            ? 'Cofre de segredos indisponível'
+            : 'Serviço de assinatura indisponível',
+      };
     }
 
     if (code === 'VALIDATION') {
