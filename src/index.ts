@@ -1,5 +1,11 @@
-import { Elysia } from 'elysia';
+import { app } from './app';
+import { config } from './config/env';
+import { logger } from './shared/logging';
 
-const app = new Elysia().get('/health', () => ({ status: 'ok' })).listen(3000);
-
-console.log(`Servidor no ar em http://${app.server?.hostname}:${app.server?.port}`);
+app.listen(config.port, () => {
+  logger.info('Serviço iniciado', 'bootstrap', {
+    ambiente: config.nodeEnv,
+    porta: config.port,
+    modoAdmin: config.adminAuthMode,
+  });
+});
