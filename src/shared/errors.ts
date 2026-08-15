@@ -92,6 +92,18 @@ export class CredencialAdminInvalidaError extends Error {
   }
 }
 
+/**
+ * O autenticador administrativo configurado não conseguiu decidir (ex.: o
+ * modo Entra ID ainda não homologado). Diferente de credencial inválida:
+ * aqui o problema é do serviço, não de quem chamou.
+ */
+export class AutenticacaoAdminIndisponivelError extends Error {
+  constructor(descricao = 'Autenticação administrativa indisponível') {
+    super(descricao);
+    this.name = 'AutenticacaoAdminIndisponivelError';
+  }
+}
+
 /** Token ausente, malformado, com assinatura inválida ou claims faltando. */
 export class TokenInvalidoError extends Error {
   constructor(descricao: string) {

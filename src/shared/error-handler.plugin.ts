@@ -6,7 +6,13 @@
 
 import { Elysia } from 'elysia';
 import { VaultError } from '../vault/client';
-import { ChaveDeAssinaturaIndisponivelError, ErroDeNegocio, ErroOAuth } from './errors';
+import {
+  AutenticacaoAdminIndisponivelError,
+  ChaveDeAssinaturaIndisponivelError,
+  CredencialAdminInvalidaError,
+  ErroDeNegocio,
+  ErroOAuth,
+} from './errors';
 import { logger } from './logging';
 
 export const errorHandlerPlugin = new Elysia({ name: 'error-handler' }).onError(
@@ -18,6 +24,18 @@ export const errorHandlerPlugin = new Elysia({ name: 'error-handler' }).onError(
         set.headers['WWW-Authenticate'] = 'Bearer';
       }
       return { error: error.erro, error_description: error.message };
+    }
+
+    if (error instanceof CredencialAdminInvalidaError) {
+      set.status = 401;
+      set.headers['WWW-Authenticate'] = 'Bearer';
+      return { detail: error.message };
+    }
+
+    if (error instanceof AutenticacaoAdminIndisponivelError) {
+      set.status = 503;
+      logger.error(error.message, 'error-handler', { tipo: error.constructor.name });
+      return { detail: error.message };
     }
 
     if (error instanceof ErroDeNegocio) {
